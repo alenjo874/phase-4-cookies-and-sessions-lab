@@ -3,12 +3,22 @@ class ArticlesController < ApplicationController
 
   def index
     articles = Article.all.includes(:user).order(created_at: :desc)
+
     render json: articles, each_serializer: ArticleListSerializer
   end
 
   def show
-    article = Article.find(params[:id])
-    render json: article
+    session[:page_views] ||= 0
+    session[:page_views] += 1
+
+    if session[:page_views] <= 3
+      articales = Article.find(params[:id])
+      render json: articales
+
+    else 
+      render json: { error: "Maximum pageview limit reached"}, status: 401
+    end
+
   end
 
   private
